@@ -62,9 +62,10 @@ class File:
 
 
 class Directory:
-    def __init__(self, name):
+    def __init__(self, name, parent=None):
         self.name = name
         self.contents = {}
+        self.parent = parent
 
     def mkdir(self):
         pass
@@ -87,22 +88,66 @@ class Directory:
 
 class VirtualFileSystem:
     def __init__(self):
-        self.root = Directory("/")
+        self.root = Directory("root")
         self.current = self.root
-        self.path = []
+        self.path = ["root"]
 
-    def cd(self):
-        pass
+    def mkdir(self,name,path=""):
+        new_dir = Directory(name, self.current)
+        if path == "":
+            self.current.contents[name] = new_dir
+        else:
+            path.contents[name] = new_dir
+
+        print("New Directory created!")
+
+    def cd(self,path):
+        if path == "..":
+            if self.current.parent is not None:
+                self.current = self.current.parent
+                self.path.pop()      
+        else:
+            self.current = self.current.contents[path]
+            self.path.append(path)
 
 
+    def ls(self):
+        for dirc in self.current.contents :
+            print(dirc)
 class CommandPrommt:
-    def __init__(self, user):
-        self.commands = {}
+    def __init__(self, user, file_system:VirtualFileSystem):
+        self.commands = {"mkdir":file_system.mkdir,"cd":file_system.cd,"ls":file_system.ls}
         self.user = user
 
+
+    def _path_parser(self,path):
+        if path[0] == "/":
+            folder =file_system.root
+            for name in (path.split("/"))[1:]:
+                folder= folder.contents[name]
+            return folder
+        else:
+            return path
+
     def read_line(self):
-        pass
+        command = input(f"{'/'.join(file_system.path)} {self.user} >")
+        command = command.split(" ")
+        func = self.commands.get(command[0])
+        if func:
+            if len(command)==1:
+                func()
+            elif len(command) == 2 :
+                func(self._path_parser(command[1]))
+            else:
+                func(self._path_parser(command[1]),self._path_parser(command[2]))
+        else:
+            print("Invalid Command!")
+        
+
 
 
 if __name__ == "__main__":
-    pass
+    file_system = VirtualFileSystem()
+    command_prommt = CommandPrommt("Admin",file_system)
+    while True:
+        command_prommt.read_line()
