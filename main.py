@@ -1,3 +1,5 @@
+from termcolor import colored
+
 class File:
     def __init__(self, name, content=""):
         if not name.endswith(".txt"):
@@ -113,7 +115,7 @@ class VirtualFileSystem:
 
     def ls(self):
         for dirc in self.current.contents :
-            print(dirc)
+            print(colored(dirc,"blue"))
 class CommandPrommt:
     def __init__(self, user, file_system:VirtualFileSystem):
         self.commands = {"mkdir":file_system.mkdir,"cd":file_system.cd,"ls":file_system.ls}
@@ -130,7 +132,7 @@ class CommandPrommt:
             return path
 
     def read_line(self):
-        command = input(f"{'/'.join(file_system.path)} {self.user} >")
+        command = input(colored(f"{'/'.join(file_system.path)} {self.user} >","green"))
         command = command.split(" ")
         func = self.commands.get(command[0])
         if func:
