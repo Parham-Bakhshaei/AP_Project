@@ -74,17 +74,17 @@ class VirtualFileSystem:
             path = self.current.contents[path]
         del path.parent.contents[path.name]
 
-    #TODO
-    def cp(self):
-        new_name = self.name.replace(".txt", "_copy.txt")
-        copied_file = File(new_name, self.content)
-        print(f"File '{self.name}' copied to '{new_name}'")
-        return copied_file
 
-    #TODO
-    def mv(self):
-        pass
+    def cp(self,path1,path2):
+        if isinstance(path1,Directory):
+            deep_copy = Directory(path1.name +"_copy",parent=path1.parent)
+        else :
+            deep_copy = File(path1.name.replace(".txt","")+"_copy.txt",content=path1.content,parent=path1.parent)
+        path2.contents[deep_copy.name] = deep_copy
 
+    def mv(self,path1,path2):
+        path2.contents[path1.name] = path1
+        del path1.parent.contents[path1.name]
 
     #TODO
     def new_file_txt(self, new_content):
@@ -110,7 +110,7 @@ class VirtualFileSystem:
 
 class CommandPrommt:
     def __init__(self, user, file_system:VirtualFileSystem):
-        self.commands = {"mkdir":file_system.mkdir,"cd":file_system.cd,"ls":file_system.ls,"touch":file_system.touch,"rm":file_system.rm,"rename":file_system.rename}
+        self.commands = {"mkdir":file_system.mkdir,"cd":file_system.cd,"ls":file_system.ls,"touch":file_system.touch,"rm":file_system.rm,"rename":file_system.rename,"cp":file_system.cp,"mv":file_system.mv}
         self.user = user
 
 
