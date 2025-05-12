@@ -1,28 +1,14 @@
 from termcolor import colored
 
 class File:
-    def __init__(self, name, content=""):
+    def __init__(self, name, content="", parent=None):
         if not name.endswith(".txt"):
             raise ValueError("File name must end with .txt")
         self.name = name
         self.content = content
+        self.parent = parent
 
-    @staticmethod
-    def touch(name, content=""):
-        if not name.endswith(".txt"):
-            raise ValueError("File name must end with .txt")
-        new_file = File(name, content)
-        print(f"new file with {new_file.name} name has been created")
-        return new_file
 
-    def rm(self):
-        print(f"file with {self.name} name was deleted.")
-        self.name = None
-        self.content = None
-
-    def new_file_txt(self, new_content):
-        self.content = ""
-        self.content += new_content
 
     def append(self, new_content):
         self.content += "\n" + new_content
@@ -49,43 +35,12 @@ class File:
         else:
             print("your file not found ! ")
 
-    def cp(self):
-        new_name = self.name.replace(".txt", "_copy.txt")
-        copied_file = File(new_name, self.content)
-        print(f"File '{self.name}' copied to '{new_name}'")
-        return copied_file
-
-    def rename(self, new_name):
-        if not new_name.endswith(".txt"):
-            print("File name must end with .txt")
-        else:
-            print(f"File renamed from '{self.name}' to '{new_name}'")
-            self.name = new_name
-
-
 class Directory:
     def __init__(self, name, parent=None):
         self.name = name
         self.contents = {}
         self.parent = parent
 
-    def mkdir(self):
-        pass
-
-    def rmdir(self):
-        pass
-
-    def mv(self):
-        pass
-
-    def cp(self):
-        pass
-
-    def rename(self):
-        pass
-
-    def ls(self):
-        pass
 
 
 class VirtualFileSystem:
@@ -101,8 +56,6 @@ class VirtualFileSystem:
         else:
             path.contents[name] = new_dir
 
-        print("New Directory created!")
-
     def cd(self,path):
         if path == "..":
             if self.current.parent is not None:
@@ -112,13 +65,52 @@ class VirtualFileSystem:
             self.current = self.current.contents[path]
             self.path.append(path)
 
-
     def ls(self):
         for dirc in self.current.contents :
             print(colored(dirc,"blue"))
+
+    def rm(self,path):
+        if not isinstance(path,Directory) or not isinstance(path,File):
+            path = self.current.contents[path]
+        del path.parent.contents[path.name]
+
+    #TODO
+    def cp(self):
+        new_name = self.name.replace(".txt", "_copy.txt")
+        copied_file = File(new_name, self.content)
+        print(f"File '{self.name}' copied to '{new_name}'")
+        return copied_file
+
+    #TODO
+    def mv(self):
+        pass
+
+
+    #TODO
+    def new_file_txt(self, new_content):
+        self.content = ""
+        self.content += new_content
+
+    def touch(self,name,path=""):
+        if not name.endswith(".txt"):
+            raise ValueError("File name must end with .txt")
+        if path == "":
+            new_file = File(name, "",self.current)
+            self.current.contents[name] = new_file
+        else:
+            new_file = File(name, "",path)
+            path.contents[name] = new_file
+
+        return new_file
+
+
+    def rename(self, path,name):
+        if path.name in path.parent.contents:
+            path.parent.contents[name] = path.parent.contents.pop(path.name)
+
 class CommandPrommt:
     def __init__(self, user, file_system:VirtualFileSystem):
-        self.commands = {"mkdir":file_system.mkdir,"cd":file_system.cd,"ls":file_system.ls}
+        self.commands = {"mkdir":file_system.mkdir,"cd":file_system.cd,"ls":file_system.ls,"touch":file_system.touch,"rm":file_system.rm,"rename":file_system.rename}
         self.user = user
 
 
