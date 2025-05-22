@@ -55,6 +55,13 @@ class VirtualFileSystem:
         self.current = self.root
         self.path = ["root"]
 
+    def _check_current_dic(self,n,prameters,path):
+        if len(prameters) == n:
+            if prameters[1] in self.current.contents.keys():
+                path = self.current.contents[prameters[1]]
+        return path
+
+
     def mkdir(self, prameters: list):
         path = prameters[0]
         name = prameters[1]
@@ -86,6 +93,7 @@ class VirtualFileSystem:
     
     def rm(self, prameters : list):
         path = prameters[0]
+        path = self._check_current_dic(2,prameters,path)
         if path:
             if isinstance(path, Directory):
                 path.contents.clear()
@@ -98,9 +106,7 @@ class VirtualFileSystem:
 
     def cp(self, prameters : list):
         source_path = prameters[0]
-        print(source_path)
         destination_path = prameters[1]
-        print(destination_path)
         if source_path and destination_path and isinstance(destination_path, Directory):
             if isinstance(source_path, Directory):
                 deep_copy = Directory(source_path.name + "_copy", parent=destination_path)
@@ -125,6 +131,7 @@ class VirtualFileSystem:
 
     def new_file_txt(self, prameters : list):
         path = prameters[0]
+        path = self._check_current_dic(2,prameters,path)
         if path and isinstance(path, File):
             print("Enter new content for the file (type 'EOF' on a new line to finish):")
             new_content = []
@@ -141,7 +148,6 @@ class VirtualFileSystem:
     def touch(self, prameters: list):
         path = prameters[0]
         name = prameters[1]
-
         if not name.endswith(".txt"):
             raise ValueError("File name must end with .txt")
 
@@ -158,7 +164,9 @@ class VirtualFileSystem:
 
     def rename(self, prameters : list):
         path = prameters[0]
-        new_name = prameters[1]
+        path = self._check_current_dic(3,prameters,path)
+        if len(prameters)==3:
+            new_name = prameters[2]
         if path and path.name in path.parent.contents:
             if "/" in new_name:
                 print("Invalid name: '/' is not allowed in names.")
@@ -169,8 +177,8 @@ class VirtualFileSystem:
             print("Invalid path or the specified path does not exist.")
 
     def append_text(self, prameters : list):
-        print(prameters)
         path = prameters[0]
+        path = self._check_current_dic(2,prameters,path)
         if isinstance(path, File):
             print("Enter text to append to the file (type 'EOF' on a new line to finish):")
             new_content = []
@@ -187,6 +195,7 @@ class VirtualFileSystem:
         path = prameters[0]
         line_number = prameters[1]
         new_content = prameters[2]
+        path = self._check_current_dic(4,prameters,path)
         if path and isinstance(path, File):
             path.edit_line(line_number, new_content)
         else:
@@ -195,6 +204,8 @@ class VirtualFileSystem:
     def delete_line(self, prameters : list):
         path = prameters[0]
         line_number = prameters[1]
+        path = self._check_current_dic(3,prameters,path)
+
         if isinstance(path, File):
             path.deline(int(line_number))
         else:
@@ -202,6 +213,7 @@ class VirtualFileSystem:
 
     def cat(self, prameters : list):
         path = prameters[0]
+        path = self._check_current_dic(2,prameters,path)
         if path and isinstance(path, File):
             path.cat()
         else:
@@ -239,7 +251,7 @@ class CommandPrommt:
                 if name not in folder.contents:
                     raise KeyError(f"Path does not exist: {path}")
                 folder = folder.contents[name]      
-        else:
+        elif path[0]=="/":
             full_path =file_system.path[1:]
             full_path.reverse()
             for dirc in full_path:
@@ -250,6 +262,13 @@ class CommandPrommt:
                         raise KeyError(f"Path does not exist: {path}")
                     folder = folder.contents[name]
             except KeyError:
+                print(f"Path does not exist: {path}")
+                return None
+        else:
+            if path in file_system.current.contents.keys():
+                print("hi")
+                folder  = file_system.current.contents[path]
+            else:
                 print(f"Path does not exist: {path}")
                 return None
         return folder
@@ -273,7 +292,6 @@ class CommandPrommt:
             func(commands[1:])
         else:
             print(colored("Invalid Command!","red"))
-
 
 if __name__ == "__main__":
     file_system = VirtualFileSystem()
