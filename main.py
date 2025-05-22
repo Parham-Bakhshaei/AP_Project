@@ -222,6 +222,26 @@ class VirtualFileSystem:
     def cls(self,prameters:list):
         print("\033c", end="")
 
+    def help(self,_):
+        print(colored("""
+    Available commands:
+
+    mkdir <path> <dirname>           - Create a new directory.
+    cd <path> <dirname|..>           - Change current directory.
+    ls                               - List contents of the current directory.
+    touch <path> <filename.txt>      - Create a new .txt file.
+    rm <path> <name>                 - Remove a file or directory.
+    rename <path> <oldname> <newname> - Rename a file or directory.
+    cp <source_path> <dest_path>     - Copy a file or directory.
+    mv <source_path> <dest_path>     - Move a file or directory.
+    nwfiletxt <path> <filename.txt>  - Overwrite content of a text file.
+    appendtxt <path> <filename.txt>  - Append text to a file.
+    editline <path> <line> <content> - Edit a specific line in a file.
+    deline <path> <line>             - Delete a specific line in a file.
+    cat <path> <filename.txt>        - Display file content.
+    cls                              - Clear the terminal.
+    help                             - Show this help message.
+    """, "cyan"))
 
 class CommandPrommt:
     def __init__(self, user, file_system: VirtualFileSystem):
@@ -240,6 +260,8 @@ class CommandPrommt:
             "deline": file_system.delete_line,
             "cat": file_system.cat,
             "cls": file_system.cls,
+            "help": file_system.help,
+
         }
         self.user = user
         self.file_system = file_system
