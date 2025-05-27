@@ -193,18 +193,27 @@ class VirtualFileSystem:
 
     def edit_line(self, prameters : list):
         path = prameters[0]
-        line_number = prameters[1]
-        new_content = prameters[2]
+        if len(prameters) ==2:
+            line_number = prameters[1]
+            new_content = prameters[2]
+        else:
+            path = self._check_current_dic(3,prameters,path)
+            line_number = prameters[2]
+            new_content = prameters[3]
+
         path = self._check_current_dic(4,prameters,path)
         if path and isinstance(path, File):
-            path.edit_line(line_number, new_content)
+            path.edit_line(int(line_number), new_content)
         else:
             print("Invalid path or the specified path is not a file.")
 
     def delete_line(self, prameters : list):
         path = prameters[0]
-        line_number = prameters[1]
-        path = self._check_current_dic(3,prameters,path)
+        if len(prameters) ==2:
+            line_number = prameters[1]
+        else:
+            path = self._check_current_dic(3,prameters,path)
+            line_number = prameters[2]
 
         if isinstance(path, File):
             path.deline(int(line_number))
